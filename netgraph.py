@@ -73,7 +73,7 @@ class NetGraph:
         labels = {node: f"ID: {node}" for node in self.G.nodes()}
         
         #draw network
-        nx.draw(self.G, self.pos, ax=ax, with_labels=True, labels=labels, node_color=node_colors, node_size=500, font_size=8)
+        nx.draw(self.G, self.pos, ax=ax, with_labels=True, labels=labels, node_color=node_colors, node_size=500, font_size=8, edge_color='grey')
 
         #add colorbar
         scalarmap = plt.cm.ScalarMappable(cmap=colormap, norm=normalized)
