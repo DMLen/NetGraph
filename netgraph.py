@@ -38,9 +38,13 @@ class NetGraph:
             nodenumber = int(self.node_entry.get())
             if nodenumber <= 0:
                 raise ValueError("Number of nodes must be positive.")
+            
+            #higher power = smaller radius
+            power = 0.5
+            radius = 1.0 / (nodenumber ** power) #make radius smaller if more nodes
 
             #use networkx to generate a random graph.
-            self.G = nx.random_geometric_graph(n=nodenumber, radius=0.2)
+            self.G = nx.random_geometric_graph(n=nodenumber, radius=radius)
 
             #if previous graph exists, clear it
             if self.canvas:
@@ -48,7 +52,7 @@ class NetGraph:
                 plt.close('all') #clear prev figure
                 messagebox.showwarning("Warning", "Previous graph cleared!")
 
-            self.pos = nx.spring_layout(self.G) #initial node positions are stored in self.pos
+            self.pos = nx.spring_layout(self.G, k=0.4, iterations=7) #initial node positions are stored in self.pos
             self.draw_graph()
 
         except ValueError as e:
