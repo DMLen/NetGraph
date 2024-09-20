@@ -40,7 +40,7 @@ class NetGraph:
                 raise ValueError("Number of nodes must be positive.")
 
             #use networkx to generate a random graph.
-            self.G = nx.erdos_renyi_graph(n=nodenumber, p=0.1)
+            self.G = nx.random_geometric_graph(n=nodenumber, radius=0.2)
 
             #if previous graph exists, clear it
             if self.canvas:
