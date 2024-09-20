@@ -48,6 +48,9 @@ class NetGraph:
 
             #if previous graph exists, clear it
             if self.canvas:
+                if not messagebox.askyesno("Confirmation", "Do you want to generate a new graph?"):
+                    return
+            
                 self.canvas.get_tk_widget().destroy()
                 plt.close('all') #clear prev figure
                 messagebox.showwarning("Warning", "Previous graph cleared!")
@@ -67,8 +70,10 @@ class NetGraph:
         colormap = plt.cm.coolwarm
         node_colors = [colormap(normalized(degrees[node])) for node in self.G.nodes()]
 
+        labels = {node: f"ID: {node}" for node in self.G.nodes()}
+        
         #draw network
-        nx.draw(self.G, self.pos, ax=ax, with_labels=True, node_color=node_colors, node_size=500, font_size=8)
+        nx.draw(self.G, self.pos, ax=ax, with_labels=True, labels=labels, node_color=node_colors, node_size=500, font_size=8)
 
         #add colorbar
         scalarmap = plt.cm.ScalarMappable(cmap=colormap, norm=normalized)
