@@ -25,9 +25,18 @@ class NetGraph:
         self.generate_button = tk.Button(self.frame, text="Generate Random Graph", command=self.generate_graph)
         self.generate_button.pack()
 
-        #delete button
-        self.delete_button = tk.Button(self.frame, text="Delete Random Node", command=self.delete_random_node)
+        #delete buttons
+        self.deletion_label = tk.Label(self.frame, text="=== Deletion Strategies ===")
+        self.deletion_label.pack()
+
+        self.delete_button = tk.Button(self.frame, text="Delete [Random]", command=self.delete_random_node, bg='orangered')
         self.delete_button.pack()
+
+        self.delete_max_button = tk.Button(self.frame, text="Delete [Most Connections]", command=self.delete_max_node, bg='orangered')
+        self.delete_max_button.pack()
+
+        self.delete_maxneighbour_button = tk.Button(self.frame, text="Delete [Neighbour of Most Connections]", command=self.delete_maxneighbour_node, bg='orangered')
+        self.delete_maxneighbour_button.pack()
 
         self.canvas = None
         self.G = None #g = graph
@@ -66,9 +75,14 @@ class NetGraph:
 
         #calculate colourmap (based on node degrees)
         degrees = dict(self.G.degree())
-        normalized = Normalize(vmin=0, vmax=max(degrees.values()))
+        normalized = Normalize(vmin=1, vmax=max(degrees.values()))
         colormap = plt.cm.coolwarm
-        node_colors = [colormap(normalized(degrees[node])) for node in self.G.nodes()]
+
+        #give unconnected nodes a distinct colour
+        node_colors = [
+            '#515151' if degrees[node] == 0 else colormap(normalized(degrees[node]))
+            for node in self.G.nodes()
+        ]
 
         labels = {node: f"ID: {node}" for node in self.G.nodes()}
         
@@ -99,6 +113,12 @@ class NetGraph:
         plt.close('all') #clear prev figure
         self.canvas.get_tk_widget().destroy() #clear prev canvas
         self.draw_graph()
+
+    def delete_max_node(self):
+        print("dummy function!")
+
+    def delete_maxneighbour_node(self):
+        print("dummy function!")
 
 #main control loop
 if __name__ == "__main__":
