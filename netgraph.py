@@ -57,12 +57,20 @@ class NetGraph:
     def draw_graph(self):
         fig, ax = plt.subplots(figsize=(10, 8))
 
+        #calculate colourmap (based on node degrees)
         degrees = dict(self.G.degree())
         normalized = Normalize(vmin=min(degrees.values()), vmax=max(degrees.values()))
         colormap = plt.cm.coolwarm
         node_colors = [colormap(normalized(degrees[node])) for node in self.G.nodes()]
 
+        #draw network
         nx.draw(self.G, self.pos, ax=ax, with_labels=True, node_color=node_colors, node_size=500, font_size=8)
+
+        #add colorbar
+        scalarmap = plt.cm.ScalarMappable(cmap=colormap, norm=normalized)
+        scalarmap.set_array([])
+        colorbar = fig.colorbar(scalarmap, ax=ax, orientation='horizontal', pad=0.1)
+        colorbar.set_label('Node Degree (Active Connections per Node)')
 
         self.canvas = FigureCanvasTkAgg(fig, master=self.frame)
         self.canvas.draw()
