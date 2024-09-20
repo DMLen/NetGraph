@@ -40,7 +40,7 @@ class NetGraph:
                 raise ValueError("Number of nodes must be positive.")
 
             #use networkx to generate a random graph.
-            self.G = nx.erdos_renyi_graph(n=nodenumber, p=0.2)
+            self.G = nx.erdos_renyi_graph(n=nodenumber, p=0.1)
 
             #if previous graph exists, clear it
             if self.canvas:
@@ -59,7 +59,7 @@ class NetGraph:
 
         #calculate colourmap (based on node degrees)
         degrees = dict(self.G.degree())
-        normalized = Normalize(vmin=min(degrees.values()), vmax=max(degrees.values()))
+        normalized = Normalize(vmin=0, vmax=max(degrees.values()))
         colormap = plt.cm.coolwarm
         node_colors = [colormap(normalized(degrees[node])) for node in self.G.nodes()]
 
@@ -70,7 +70,7 @@ class NetGraph:
         scalarmap = plt.cm.ScalarMappable(cmap=colormap, norm=normalized)
         scalarmap.set_array([])
         colorbar = fig.colorbar(scalarmap, ax=ax, orientation='horizontal', pad=0.1)
-        colorbar.set_label('Node Degree (Active Connections per Node)')
+        colorbar.set_label('Node Degree (Connections per Node)')
 
         self.canvas = FigureCanvasTkAgg(fig, master=self.frame)
         self.canvas.draw()
