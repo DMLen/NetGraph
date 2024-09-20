@@ -29,6 +29,7 @@ class NetGraph:
 
         self.canvas = None
         self.G = None #g = graph
+        self.pos = {} #dictionary to store node positions
 
     def generate_graph(self):
         try:
@@ -42,9 +43,10 @@ class NetGraph:
             #if previous graph exists, clear it
             if self.canvas:
                 self.canvas.get_tk_widget().destroy()
-                plt.close('all')  # Close all existing figures
+                plt.close('all') #clear prev figure
                 messagebox.showwarning("Warning", "Previous graph cleared!")
-                
+
+            self.pos = nx.spring_layout(self.G) #initial node positions are stored in self.pos
             self.draw_graph()
 
         except ValueError as e:
@@ -52,8 +54,7 @@ class NetGraph:
 
     def draw_graph(self):
         fig, ax = plt.subplots(figsize=(10, 8))
-        pos = nx.spring_layout(self.G)  # positions for all nodes
-        nx.draw(self.G, pos, ax=ax, with_labels=True, node_color='lightblue', node_size=600, font_size=8)
+        nx.draw(self.G, self.pos, ax=ax, with_labels=True, node_color='lightblue', node_size=500, font_size=8)
 
         self.canvas = FigureCanvasTkAgg(fig, master=self.frame)
         self.canvas.draw()
@@ -67,7 +68,11 @@ class NetGraph:
         node_deletion_target = random.choice(list(self.G.nodes()))
         self.G.remove_node(node_deletion_target)
 
-        self.canvas.get_tk_widget().destroy() #clear previous canvas and redraw
+        if node_deletion_target in self.pos:
+            del self.pos[node_deletion_target] #remove pos from dictionary
+
+        plt.close('all') #clear prev figure
+        self.canvas.get_tk_widget().destroy() #clear prev canvas
         self.draw_graph()
 
 #main control loop
