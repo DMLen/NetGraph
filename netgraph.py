@@ -4,6 +4,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import random
+from matplotlib.colors import Normalize
+from matplotlib.cm import ScalarMappable
 
 class NetGraph:
     def __init__(self, root):
@@ -33,12 +35,12 @@ class NetGraph:
 
     def generate_graph(self):
         try:
-            n = int(self.node_entry.get())
-            if n <= 0:
+            nodenumber = int(self.node_entry.get())
+            if nodenumber <= 0:
                 raise ValueError("Number of nodes must be positive.")
 
-            #use networkx to generate a random graph. probability of edge creation is 0.3
-            self.G = nx.erdos_renyi_graph(n=n, p=0.3)
+            #use networkx to generate a random graph.
+            self.G = nx.erdos_renyi_graph(n=nodenumber, p=0.2)
 
             #if previous graph exists, clear it
             if self.canvas:
@@ -54,7 +56,13 @@ class NetGraph:
 
     def draw_graph(self):
         fig, ax = plt.subplots(figsize=(10, 8))
-        nx.draw(self.G, self.pos, ax=ax, with_labels=True, node_color='lightblue', node_size=500, font_size=8)
+
+        degrees = dict(self.G.degree())
+        normalized = Normalize(vmin=min(degrees.values()), vmax=max(degrees.values()))
+        colormap = plt.cm.coolwarm
+        node_colors = [colormap(normalized(degrees[node])) for node in self.G.nodes()]
+
+        nx.draw(self.G, self.pos, ax=ax, with_labels=True, node_color=node_colors, node_size=500, font_size=8)
 
         self.canvas = FigureCanvasTkAgg(fig, master=self.frame)
         self.canvas.draw()
