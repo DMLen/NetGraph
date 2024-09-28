@@ -32,10 +32,10 @@ class NetGraph:
         self.delete_button = tk.Button(self.frame, text="Delete [Random]", command=self.delete_random_node, bg='orangered')
         self.delete_button.pack()
 
-        self.delete_max_button = tk.Button(self.frame, text="Delete [Most Connections]", command=self.delete_max_node, bg='orangered')
+        self.delete_max_button = tk.Button(self.frame, text="Delete [Most Connections] [UNIMPLEMENTED]", command=self.delete_max_node, bg='orangered')
         self.delete_max_button.pack()
 
-        self.delete_maxneighbour_button = tk.Button(self.frame, text="Delete [Neighbour of Most Connections]", command=self.delete_maxneighbour_node, bg='orangered')
+        self.delete_maxneighbour_button = tk.Button(self.frame, text="Delete [Neighbour of Most Connections] [UNIMPLEMENTED]", command=self.delete_maxneighbour_node, bg='orangered')
         self.delete_maxneighbour_button.pack()
 
         self.canvas = None
@@ -118,6 +118,11 @@ class NetGraph:
         print("dummy function!")
 
     def delete_maxneighbour_node(self):
+        print("dummy function!")
+
+    #network healing (singular step) per Degree Assisted Self-Healing algorithm described by Dr Amitabh Trehan
+    #currently unimplemented
+    def DASH_healingstep(self):
         print("dummy function!")
 
 #main control loop
