@@ -69,7 +69,7 @@ class NetGraph:
         self.last_deleted_node = None
         self.last_deleted_node_neighbours_list = None #contains unique neighbours (not sharing the same dashID) of the last deleted node
 
-    def generate_graph(self):
+    def generate_graph(self): #for initial generation
         try:
             nodenumber = int(self.node_entry.get())
             if nodenumber <= 0:
@@ -80,7 +80,10 @@ class NetGraph:
             radius = 1.0 / (nodenumber ** power) #make radius smaller if more nodes
 
             #use networkx to generate a random graph.
-            self.G = nx.random_geometric_graph(n=nodenumber, radius=radius)
+            while True:
+                self.G = nx.random_geometric_graph(n=nodenumber, radius=radius)
+                if nx.is_connected(self.G):
+                    break
 
             #initialize node deltas (degrees changed) and DASH ID
             for node in self.G.nodes():
