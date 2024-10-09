@@ -65,4 +65,16 @@ def dash(graph, deletednode, deletednodeneighbours):
         graph.add_edge(traversed[i], traversed[i+1])
         print(f"Added edge between {traversed[i]} and {traversed[i+1]}")
 
+    #3. propagate minimum DashID of neighbour nodes to all nodes processed in this operation
+    #find minimum DashID of deletednodeneighbours
+    min_dashID = min([graph.nodes[id]['dashID'] for id in deletednodeneighbours])
+    print(f"Minimum DashID of deleted node's neighbours: {min_dashID}")
+
+    #propagate minimum DashID to all nodes processed in this operation
+    for id in traversed:
+        graph.nodes[id]['dashID'] = min_dashID
+
+        print(f"Propagated DashID {min_dashID} to node {id}")   
+    
+    print(f"=== DASH operation complete ===")
     return graph
