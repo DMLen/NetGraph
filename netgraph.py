@@ -101,9 +101,30 @@ class NetGraph:
     def debug(self):
         print(partition(self.G, 1))
 
+    def get_healing_neighbors(self, node):
+        if self.G is None:
+            print("Graph is None, returning empty list.")
+            return []
+
+        healing_neighbors = []
+        for u, v in self.new_edges:
+            if u == node:
+                healing_neighbors.append(v)
+                print(f"Node {node} is connected to {v} via healing edge.")
+            elif v == node:
+                healing_neighbors.append(u)
+                print(f"Node {node} is connected to {u} via healing edge.")
+        
+        print(f"Healing neighbors for node {node}: {healing_neighbors}")
+        return healing_neighbors
+
     def handle_deletion(self, node):
         self.last_deleted_node = node
         self.last_deleted_node_neighbours_list = partition(self.G, node)
+        templist = self.get_healing_neighbors(node)
+        for i in templist:
+            self.last_deleted_node_neighbours_list.append(i)
+
         self.G.remove_node(node)
 
         if node in self.pos:
