@@ -224,7 +224,8 @@ class NetGraph:
         for i in returned_new_edges:
             self.new_edges.append(i)
 
-        print(f"New edges created: {self.new_edges}")
+        print(f"New edges created in this healing step: {returned_new_edges}")
+        print(f"New edges created since graph creation: {self.new_edges}")
 
         plt.close('all') #clear prev figure
         self.canvas.get_tk_widget().destroy() #clear prev canvas
