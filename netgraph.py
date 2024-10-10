@@ -107,7 +107,7 @@ class NetGraph:
             return []
 
         healing_neighbors = []
-        for u, v in self.new_edges:
+        for u, v in self.valid_new_edges:
             if u == node:
                 healing_neighbors.append(v)
                 print(f"Node {node} is connected to {v} via healing edge.")
