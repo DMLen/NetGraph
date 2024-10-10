@@ -101,6 +101,14 @@ class NetGraph:
     def debug(self):
         print(partition(self.G, 1))
 
+    def handle_deletion(self, node):
+        self.last_deleted_node = node
+        self.last_deleted_node_neighbours_list = partition(self.G, node)
+        self.G.remove_node(node)
+
+        if node in self.pos:
+            del self.pos[node] #remove pos from dictionary
+
     def generate_graph(self): #for initial generation
         try:
             nodenumber = int(self.node_entry.get())
@@ -181,12 +189,7 @@ class NetGraph:
             return
 
         node_deletion_target = random.choice(list(self.G.nodes()))
-        self.last_deleted_node = node_deletion_target
-        self.last_deleted_node_neighbours_list = partition(self.G, node_deletion_target)
-        self.G.remove_node(node_deletion_target)
-
-        if node_deletion_target in self.pos:
-            del self.pos[node_deletion_target] #remove pos from dictionary
+        self.handle_deletion(node_deletion_target)
 
         plt.close('all') #clear prev figure
         self.canvas.get_tk_widget().destroy() #clear prev canvas
@@ -198,12 +201,7 @@ class NetGraph:
             return
         
         max_node = max(self.G.degree, key=lambda x: x[1])[0] #get node with max edge count
-        self.last_deleted_node = max_node
-        self.last_deleted_node_neighbours_list = partition(self.G, max_node)
-        self.G.remove_node(max_node)
-
-        if max_node in self.pos:
-            del self.pos[max_node] #remove node's position from dictionary
+        self.handle_deletion(max_node)
 
         plt.close('all') #clear prev figure
         self.canvas.get_tk_widget().destroy() #clear prev canvas
