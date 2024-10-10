@@ -1,30 +1,36 @@
 import networkx
+import netgraph
+
+def return_node_delta(graph, id):
+        return graph.nodes[id]['delta']
 
 class btreeNode: #class for nodes in the btree
-    def __init__(self, id):
+    def __init__(self, graph, id):
         self.id = id
+        self.delta = return_node_delta(graph, id) #delta value of the node
         self.leftchild = None
         self.rightchild = None
 
 class btree:
-    def __init__(self):
+    def __init__(self, graph):
         self.root = None
+        self.graph = graph
 
     def insert(self, val):
         if self.root is None:
-            self.root = btreeNode(val) #convert graph's node to an abstract btreeNode
+            self.root = btreeNode(self.graph, val) #convert graph's node to an abstract btreeNode
         else:
             self.recursive_insert(self.root, val)
 
     def recursive_insert(self, current_node, val):
-        if val < current_node.id:
+        if return_node_delta(self.graph, val) < current_node.delta:
             if current_node.leftchild is None:
-                current_node.leftchild = btreeNode(val)
+                current_node.leftchild = btreeNode(self.graph, val)
             else:
                 self.recursive_insert(current_node.leftchild, val)
         else: #if val greater than or equal to value of current node
             if current_node.rightchild is None:
-                current_node.rightchild = btreeNode(val)
+                current_node.rightchild = btreeNode(self.graph, val)
             else:
                 self.recursive_insert(current_node.rightchild, val)
 
@@ -52,7 +58,11 @@ def dash(graph, deletednode, deletednodeneighbours):
         return graph, []
 
 
-    binarytree = btree()
+    binarytree = btree(graph)
+
+    #prestep. remove duplicate nodes from deletednodeneighbours
+    deletednodeneighbours = list(set(deletednodeneighbours))
+
 
     #1. inserted neighbours of deleted node by ascending order of delta value
     sorted_deletednodeneighbours = sorted(deletednodeneighbours, key=lambda id: graph.nodes[id]['delta'])
@@ -70,25 +80,33 @@ def dash(graph, deletednode, deletednodeneighbours):
     #2. add edges between nodes of graph based on how they are connected in binary tree
     traversed = binarytree.inorder_traversal()
     new_edges = [] #list of new edges created via healing
+    edges_added = False #track whether edges were created to avoid unneccessary propagation of DashID if all edges already exist
+    altered_nodes = [] #nodes with new edges
 
     for i in range(len(traversed) - 1):
         if not graph.has_edge(traversed[i], traversed[i+1]):
             graph.add_edge(traversed[i], traversed[i+1])
             new_edges.append((traversed[i], traversed[i+1])) #add new edge to list
             print(f"Added edge between {traversed[i]} and {traversed[i+1]}")
+            edges_added = True
+            altered_nodes.append(traversed[i])
+            altered_nodes.append(traversed[i+1])
         else:
             print(f"Edge between {traversed[i]} and {traversed[i+1]} already exists.")
 
     #3. propagate minimum DashID of neighbour nodes to all nodes processed in this operation
     #find minimum DashID of deletednodeneighbours
-    min_dashID = min([graph.nodes[id]['dashID'] for id in deletednodeneighbours])
-    print(f"Minimum DashID of deleted node's neighbours: {min_dashID}")
+    if edges_added:
+        min_dashID = min([graph.nodes[id]['dashID'] for id in deletednodeneighbours])
+        print(f"Minimum DashID of deleted node's neighbours: {min_dashID}")
 
-    #propagate minimum DashID to all nodes processed in this operation
-    for id in traversed:
-        graph.nodes[id]['dashID'] = min_dashID
-        graph.nodes[id]['delta'] += 1 #
+        #propagate minimum DashID to all nodes processed in this operation
+        for id in altered_nodes:
+            graph.nodes[id]['dashID'] = min_dashID
+            graph.nodes[id]['delta'] += 1 #
 
-        print(f"Propagated DashID {min_dashID} to node {id}")   
+            print(f"Propagated DashID {min_dashID} to node {id}")
+    else:
+        print(f"No edges were added, DashID not propagated.")   
 
     return graph, new_edges

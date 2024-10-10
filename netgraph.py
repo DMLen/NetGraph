@@ -119,6 +119,7 @@ class NetGraph:
         return healing_neighbors
 
     def handle_deletion(self, node):
+        print(f"==Deletion event: Node {node}===")
         self.last_deleted_node = node
         self.last_deleted_node_neighbours_list = partition(self.G, node)
         templist = self.get_healing_neighbors(node)
@@ -129,6 +130,7 @@ class NetGraph:
 
         if node in self.pos:
             del self.pos[node] #remove pos from dictionary
+        print(f"===Deletion conclusion===")
 
     def generate_graph(self): #for initial generation
         try:
