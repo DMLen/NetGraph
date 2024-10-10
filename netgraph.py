@@ -94,6 +94,10 @@ class NetGraph:
         self.debug_button = tk.Button(self.frame, text="DEBUG", command=self.debug, bg='blue')
         self.debug_button.pack()
 
+        #disconnected graph warning
+        self.warning_label = tk.Label(self.frame, text="", fg="red")
+        self.warning_label.pack()
+
         self.canvas = None
         self.G = None #g = graph
         self.healcount = 1
@@ -131,6 +135,12 @@ class NetGraph:
         if node in self.pos:
             del self.pos[node] #remove pos from dictionary
         print(f"===Deletion conclusion===")
+
+    def check_connectedness(self):
+        if not nx.is_connected(self.G):
+            self.warning_label.config(text="Warning: The graph is disconnected!")
+        else:
+            self.warning_label.config(text="")
 
     def generate_graph(self): #for initial generation
         try:
@@ -192,6 +202,7 @@ class NetGraph:
         labels = {node: f"ID: {node}\nDashID: {self.G.nodes[node].get('dashID')}\nDelta: {self.G.nodes[node].get('delta')}" for node in self.G.nodes()}
         
         #draw network
+        self.check_connectedness()
         nx.draw(self.G, self.pos, ax=ax, with_labels=True, labels=labels, node_color=node_colors, node_size=500, font_size=8, edge_color='grey')
         self.valid_new_edges = [(u, v) for u, v in self.new_edges if u in self.G.nodes() and v in self.G.nodes()]
         nx.draw_networkx_edges(self.G, self.pos, edgelist=self.valid_new_edges, edge_color='red', ax=ax)
