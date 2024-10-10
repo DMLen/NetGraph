@@ -205,7 +205,7 @@ class NetGraph:
         self.check_connectedness()
         nx.draw(self.G, self.pos, ax=ax, with_labels=True, labels=labels, node_color=node_colors, node_size=500, font_size=8, edge_color='grey')
         self.valid_new_edges = [(u, v) for u, v in self.new_edges if u in self.G.nodes() and v in self.G.nodes()]
-        nx.draw_networkx_edges(self.G, self.pos, edgelist=self.valid_new_edges, edge_color='red', ax=ax)
+        nx.draw_networkx_edges(self.G, self.pos, edgelist=self.valid_new_edges, edge_color='red', ax=ax, width=1.5)
 
         #add colorbar
         scalarmap = plt.cm.ScalarMappable(cmap=colormap, norm=normalized)
@@ -257,7 +257,8 @@ class NetGraph:
             self.new_edges.append(i)
 
         print(f"New edges created in this healing step: {returned_new_edges}")
-        print(f"New edges created since graph creation: {self.new_edges}")
+        self.valid_new_edges = [(u, v) for u, v in self.new_edges if u in self.G.nodes() and v in self.G.nodes()]
+        print(f"New existant edges created since graph creation: {self.valid_new_edges}")
 
         plt.close('all') #clear prev figure
         self.canvas.get_tk_widget().destroy() #clear prev canvas
