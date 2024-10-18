@@ -199,7 +199,7 @@ class NetGraph:
             for node in self.G.nodes()
         ] #if node has connections, colour is determined by normalised colormap. lower bound is 1, upper bound is current maximum degree within the network (within the current iteration)
 
-        labels = {node: f"ID: {node}\nDashID: {self.G.nodes[node].get('dashID')}\nDelta: {self.G.nodes[node].get('delta')}" for node in self.G.nodes()}
+        labels = {node: f"nID: {node}\nDashID: {self.G.nodes[node].get('dashID')}\nDelta: {self.G.nodes[node].get('delta')}" for node in self.G.nodes()}
         
         #draw network
         self.check_connectedness()
