@@ -19,18 +19,21 @@ class btree:
     def insert(self, val):
         if self.root is None:
             self.root = btreeNode(self.graph, val) #convert graph's node to an abstract btreeNode
+            print(f"Inserted {val} as root node with delta {self.root.delta}.")
         else:
             self.recursive_insert(self.root, val)
 
     def recursive_insert(self, current_node, val):
-        if return_node_delta(self.graph, val) < current_node.delta:
+        if return_node_delta(self.graph, val) <= current_node.delta:
             if current_node.leftchild is None:
                 current_node.leftchild = btreeNode(self.graph, val)
+                print(f"Inserted {val} as left child of {current_node.id} as child delta {return_node_delta(self.graph, val)} is less than or equal to parent delta {current_node.delta}")
             else:
                 self.recursive_insert(current_node.leftchild, val)
-        else: #if val greater than or equal to value of current node
+        else: #if val greater than value of current node
             if current_node.rightchild is None:
                 current_node.rightchild = btreeNode(self.graph, val)
+                print(f"Inserted {val} as right child of {current_node.id} as child delta {return_node_delta(self.graph, val)} is greater than parent delta {current_node.delta}")
             else:
                 self.recursive_insert(current_node.rightchild, val)
 
@@ -44,6 +47,20 @@ class btree:
             self.recursive_inorder_traversal(node.leftchild, result)
             result.append(node.id)
             self.recursive_inorder_traversal(node.rightchild, result)
+
+    def find_direct_connections(self):
+        connections = {}
+        self.recursive_find_connections(self.root, connections)
+        return connections
+    
+    def recursive_find_connections(self, node, connections):
+        if node is not None:
+            if node.leftchild is not None:
+                connections[node.id] = connections.get(node.id, []) + [node.leftchild.id]
+            if node.rightchild is not None:
+                connections[node.id] = connections.get(node.id, []) + [node.rightchild.id]
+            self.recursive_find_connections(node.leftchild, connections)
+            self.recursive_find_connections(node.rightchild, connections)
 
 def dash(graph, deletednode, deletednodeneighbours):
     #note: deletednodeneighbours is only a list of ints!!! delta values have to be acquired from the graph
@@ -65,34 +82,33 @@ def dash(graph, deletednode, deletednodeneighbours):
 
 
     #1. inserted neighbours of deleted node by ascending order of delta value
-    sorted_deletednodeneighbours = sorted(deletednodeneighbours, key=lambda id: graph.nodes[id]['delta'])
-    print(f"Sorted neighbours by delta values: {sorted_deletednodeneighbours}")
+    #sorted_deletednodeneighbours = sorted(deletednodeneighbours, key=lambda id: graph.nodes[id]['delta'])
+    #print(f"Sorted neighbours by delta values: {sorted_deletednodeneighbours}")
 
-    for node_id in sorted_deletednodeneighbours:
+    for node_id in deletednodeneighbours:
         delta_value = graph.nodes[node_id]['delta']
         print(f"Node ID: {node_id}, Delta Value: {delta_value}")
-
-
-    for id in sorted_deletednodeneighbours:
-        binarytree.insert(id)
-        print(f"Inserted node {id} into binary tree.")
+        binarytree.insert(node_id)
 
     #2. add edges between nodes of graph based on how they are connected in binary tree
-    traversed = binarytree.inorder_traversal()
     new_edges = [] #list of new edges created via healing
     edges_added = False #track whether edges were created to avoid unneccessary propagation of DashID if all edges already exist
     altered_nodes = [] #nodes with new edges
+    connections = binarytree.find_direct_connections()
 
-    for i in range(len(traversed) - 1):
-        if not graph.has_edge(traversed[i], traversed[i+1]):
-            graph.add_edge(traversed[i], traversed[i+1])
-            new_edges.append((traversed[i], traversed[i+1])) #add new edge to list
-            print(f"Added edge between {traversed[i]} and {traversed[i+1]}")
-            edges_added = True
-            altered_nodes.append(traversed[i])
-            altered_nodes.append(traversed[i+1])
-        else:
-            print(f"Edge between {traversed[i]} and {traversed[i+1]} already exists.")
+    print(f"Direct connections: {connections}")
+
+    for parent, children in connections.items():
+        for child in children:
+            if not graph.has_edge(parent, child):
+                graph.add_edge(parent, child)
+                new_edges.append((parent, child))  # Add new edge to list
+                print(f"Added edge between {parent} and {child}")
+                edges_added = True
+                altered_nodes.append(parent)
+                altered_nodes.append(child)
+            else:
+                print(f"Edge between {parent} and {child} already exists.")
 
     #3. propagate minimum DashID of neighbour nodes to all nodes processed in this operation
     #find minimum DashID of deletednodeneighbours
