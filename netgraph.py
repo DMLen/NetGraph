@@ -141,9 +141,12 @@ class NetGraph:
         print(f"==Deletion event: Node {node}===")
         self.last_deleted_node = node
         self.last_deleted_node_neighbours_list = partition(self.G, node)
+
+        #process healing neighbours (add them to list of deleted node's neighbours and decrement their delta value)
         templist = self.get_healing_neighbors(node)
         for i in templist:
             self.last_deleted_node_neighbours_list.append(i)
+            self.G.nodes[i]['delta'] -= 1
 
         self.G.remove_node(node)
 
@@ -283,8 +286,10 @@ class NetGraph:
         returned_new_edges = []
         self.G, returned_new_edges = dash.dash(self.G, self.last_deleted_node, self.last_deleted_node_neighbours_list)
 
-        for i in returned_new_edges:
-            self.new_edges.append(i)
+        for i, j in returned_new_edges:
+            self.new_edges.append((i, j))
+            self.G.nodes[i]['delta'] += 1
+            self.G.nodes[j]['delta'] += 1
 
         print(f"New edges created in this healing step: {returned_new_edges}")
         self.valid_new_edges = [(u, v) for u, v in self.new_edges if u in self.G.nodes() and v in self.G.nodes()]

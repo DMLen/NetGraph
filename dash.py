@@ -119,7 +119,6 @@ def dash(graph, deletednode, deletednodeneighbours):
         #propagate minimum DashID to all nodes processed in this operation
         for id in altered_nodes:
             graph.nodes[id]['dashID'] = min_dashID
-            graph.nodes[id]['delta'] += 1 #
 
             print(f"Propagated DashID {min_dashID} to node {id}")
     else:
