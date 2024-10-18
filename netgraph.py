@@ -7,6 +7,7 @@ import random
 from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
 from collections import defaultdict
+import math
 
 import dash
 
@@ -98,6 +99,20 @@ class NetGraph:
         self.warning_label = tk.Label(self.frame, text="", fg="red")
         self.warning_label.pack()
 
+        self.nodecount_label = tk.Label(self.frame, text="Node Count: N/A")
+        self.nodecount_label.pack()
+
+        self.highest_delta_label = tk.Label(self.frame, text="Highest Node Delta: N/A")
+        self.highest_delta_label.pack()
+
+        self.highest_degree_label = tk.Label(self.frame, text="Highest Node Degree: N/A")
+        self.highest_degree_label.pack()
+
+        self.logNcount = tk.Label(self.frame, text="2 Log(n): N/A")
+        self.logNcount.pack()
+
+        self.nodenumber = tk.Label(self.frame, text="Number of Nodes: N/A")
+
         self.canvas = None
         self.G = None #g = graph
         self.healcount = 1
@@ -179,6 +194,9 @@ class NetGraph:
                 plt.close('all') #clear prev figure
                 messagebox.showwarning("Warning", "Previous graph cleared!")
 
+            logn = 2 * math.log(self.G.number_of_nodes())
+            self.logNcount.config(text=f"2 Log(n): {logn}")
+
             self.pos = nx.spring_layout(self.G, k=0.4, iterations=7) #initial node positions are stored in self.pos
             self.draw_graph()
 
@@ -212,6 +230,18 @@ class NetGraph:
         scalarmap.set_array([])
         colorbar = fig.colorbar(scalarmap, ax=ax, orientation='horizontal', pad=0.1)
         colorbar.set_label('Node Degree (Connections per Node)')
+
+        highest_delta = 0
+        for node in self.G.nodes():
+            if self.G.nodes[node]['delta'] > highest_delta:
+                highest_delta = self.G.nodes[node]['delta']
+        self.highest_delta_label.config(text=f"Highest Delta: {highest_delta}")
+
+        self.nodenumber.config(text=f"Number of Nodes: {self.G.number_of_nodes()}")
+
+        self.highest_degree_label.config(text=f"Highest Degree: {max(degrees.values())}")
+
+        self.nodecount_label.config(text=f"Node Count: {self.G.number_of_nodes()}")
 
         self.canvas = FigureCanvasTkAgg(fig, master=self.frame)
         self.canvas.draw()
