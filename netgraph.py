@@ -83,7 +83,7 @@ class NetGraph:
         self.delete_max_button = tk.Button(self.frame, text="Delete [Most Connections]", command=self.delete_max_node, bg='orangered')
         self.delete_max_button.pack()
 
-        self.delete_maxneighbour_button = tk.Button(self.frame, text="Delete [Neighbour of Most Connections] [UNIMPLEMENTED]", command=self.delete_maxneighbour_node, bg='orangered')
+        self.delete_maxneighbour_button = tk.Button(self.frame, text="Delete [Neighbour of Most Connections]", command=self.delete_maxneighbour_node, bg='orangered')
         self.delete_maxneighbour_button.pack()
 
         self.healing_label = tk.Label(self.frame, text="=== Healing Strategies ===")
@@ -276,7 +276,22 @@ class NetGraph:
 
 
     def delete_maxneighbour_node(self):
-        print("dummy function!")
+        if self.G is None or len(self.G) == 0:
+            messagebox.showwarning("Warning", "No graph exists!")
+            return
+        
+        max_node = max(self.G.degree, key=lambda x: x[1])[0] #get node with max edge count
+        max_node_neighbours = list(self.G.neighbors(max_node))
+
+        try:
+            self.handle_deletion(random.choice(max_node_neighbours))
+        except IndexError as e:
+            messagebox.showerror("All nodes in graph are isolates!", str(e))
+
+        plt.close('all') #clear prev figure
+        self.canvas.get_tk_widget().destroy() #clear prev canvas
+        self.draw_graph()
+
 
     #network healing (singular step) per Degree Assisted Self-Healing algorithm described by Dr Amitabh Trehan
     #currently unimplemented
