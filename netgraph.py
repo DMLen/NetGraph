@@ -315,6 +315,41 @@ class NetGraph:
         self.draw_graph()
         self.healcount += 1
         print(f"=== DASH operation complete ===")
+        return returned_new_edges #this is only ever used by the Automatic function if its running. can be ignored otherwise.
+
+    def Automatic(self): #delete random nodes, heal, log output until no nodes are left. good for bulk testing.
+        print(f"=== Automation initiated ===")
+
+        #maximal values encountered since automation start
+        maximumDelta = 0
+        maximumLogN = 0
+        highestMaxDegree = 0
+
+        with open("automatic_log_output", "w", encoding='utf-8') as file:
+
+            while len(self.G) > 0:
+
+                self.delete_random_node()
+                file.write(f"Node: {self.last_deleted_node} was deleted.\n")
+
+                edgelist = self.DASH_healingstep()
+                file.write(f"DASH healing step was performed. New edges: {edgelist}\n")
+
+                #values of current iteration
+                curDelta = #todo
+                curLogN = #todo
+                curMaxDegree = #todo
+
+                #check cur values exceed max, if so update them
+                #write cur values to file
+
+            file.write(f"=== Graph is now depleted of nodes. Summarizing below ===\n")
+            
+            #todo: write max values to log
+
+            file.write(f"=== Automation concluded. End of log. ===")
+
+        print(f"=== Automation concluded ===")
 
 #main control loop
 if __name__ == "__main__":
