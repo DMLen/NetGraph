@@ -163,3 +163,5 @@ cython_debug/
 
 #netgraph log file
 automatic_log_output.txt
+auto_output/
+output.gif
