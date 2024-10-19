@@ -8,6 +8,7 @@ from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
 from collections import defaultdict
 import math
+import time
 
 import dash
 
@@ -329,13 +330,15 @@ class NetGraph:
         #maximal values encountered since automation start
         highestMaxDelta = 0
         highestMaxDegree = 0
+        everDisconnected = False
 
         with open("automatic_log_output.txt", "w", encoding='utf-8') as file:
 
+            startTime = time.time()
             while len(self.G) > 1:
 
                 self.delete_random_node()
-                file.write(f"Node: {self.last_deleted_node} was deleted.\n")                
+                file.write(f"Node {self.last_deleted_node} was deleted. \n")                
 
                 edgelist = self.DASH_healingstep() #function also updates graph. return value is new edges
                 file.write(f"DASH healing step was performed. New edges: {edgelist}\n")
@@ -348,6 +351,7 @@ class NetGraph:
                 #write cur values to file
 
                 print(f"Stats for graph with {len(self.G)} nodes remaining: Current max delta is {curMaxDelta}, current max degree is {curMaxDegree}.\n")
+                file.write(f"Stats for graph with {len(self.G)} nodes remaining: Current max delta is {curMaxDelta}, current max degree is {curMaxDegree}.\n")
 
                 if curMaxDelta > highestMaxDelta:
                     highestMaxDelta = curMaxDelta
@@ -359,18 +363,33 @@ class NetGraph:
                     nodesWhenHighestDegree = len(self.G)
                     file.write(f"New highest degree value found: {curMaxDegree}. Currently {nodesWhenHighestDegree} remaining.\n")
 
+                if not nx.is_connected(self.G):
+                    if not everDisconnected:
+                        everDisconnected = True
+                        nodesWhenFirstDisconnect = len(self.G)
+                        file.write(f"Graph is disconnected for the first time! Currently {nodesWhenFirstDisconnect} nodes remaining.\n")
+                    else:
+                        file.write(f"Graph is currently disconnected!\n")
+
             #when there is one node left
+            endTime = time.time()
             file.write(f"=== Graph is now depleted of nodes. Summarizing information below ===\n")
+            elapsedTime = endTime - startTime
             
             #todo: write max values to log
             file.write(f"Highest delta value encountered: {highestMaxDelta}. Encountered when {nodesWhenHighestDelta} nodes were remaining.\n")
             file.write(f"Highest degree value encountered: {highestMaxDegree}. Encountered when {nodesWhenHighestDegree} nodes were remaining.\n")
             file.write(f"2 Log(n) value: {LogN}.\n")
 
-            file.write(f"=== Automation concluded. End of log. ===")
+            if everDisconnected:
+                file.write(f"Graph first became disconnected when {nodesWhenFirstDisconnect} nodes were remaining.\n")
+            else:
+                file.write(f"Graph remained connected.\n")
+
+            file.write(f"=== Automation concluded in {elapsedTime:.2f} seconds. End of log. ===")
             file.close()
 
-        print(f"=== Automation concluded ===")
+            print(f"=== Automation concluded {elapsedTime:.2f} seconds ===")
 
 #main control loop
 if __name__ == "__main__":
