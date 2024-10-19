@@ -92,7 +92,7 @@ class NetGraph:
         self.dash_button = tk.Button(self.frame, text="DASH Healing Step", command=self.DASH_healingstep, bg='green')
         self.dash_button.pack()
 
-        self.debug_button = tk.Button(self.frame, text="DEBUG", command=self.debug, bg='blue')
+        self.debug_button = tk.Button(self.frame, text="DEBUG (Autoplay)", command=self.Automatic, bg='blue')
         self.debug_button.pack()
 
         #disconnected graph warning
@@ -211,8 +211,13 @@ class NetGraph:
 
         #calculate colourmap (based on node degrees)
         degrees = dict(self.G.degree())
-        normalized = Normalize(vmin=1, vmax=max(degrees.values()))
-        colormap = plt.cm.coolwarm
+        
+        if degrees: #make sure degrees isnt empty
+            normalized = Normalize(vmin=1, vmax=max(degrees.values()))
+            colormap = plt.cm.coolwarm
+        else:
+            normalized = Normalize(vmin=1, vmax=1)
+            colormap = plt.cm.coolwarm
 
         #give unconnected nodes a distinct colour
         node_colors = [
@@ -320,34 +325,50 @@ class NetGraph:
     def Automatic(self): #delete random nodes, heal, log output until no nodes are left. good for bulk testing.
         print(f"=== Automation initiated ===")
 
+        LogN = 2 * math.log(self.G.number_of_nodes())
         #maximal values encountered since automation start
-        maximumDelta = 0
-        maximumLogN = 0
+        highestMaxDelta = 0
         highestMaxDegree = 0
 
-        with open("automatic_log_output", "w", encoding='utf-8') as file:
+        with open("automatic_log_output.txt", "w", encoding='utf-8') as file:
 
-            while len(self.G) > 0:
+            while len(self.G) > 1:
 
                 self.delete_random_node()
-                file.write(f"Node: {self.last_deleted_node} was deleted.\n")
+                file.write(f"Node: {self.last_deleted_node} was deleted.\n")                
 
-                edgelist = self.DASH_healingstep()
+                edgelist = self.DASH_healingstep() #function also updates graph. return value is new edges
                 file.write(f"DASH healing step was performed. New edges: {edgelist}\n")
 
                 #values of current iteration
-                curDelta = #todo
-                curLogN = #todo
-                curMaxDegree = #todo
+                curMaxDelta = max([self.G.nodes[node]['delta'] for node in self.G.nodes()])
+                curMaxDegree = max(dict(self.G.degree()).values())
 
                 #check cur values exceed max, if so update them
                 #write cur values to file
 
-            file.write(f"=== Graph is now depleted of nodes. Summarizing below ===\n")
+                print(f"Stats for graph with {len(self.G)} nodes remaining: Current max delta is {curMaxDelta}, current max degree is {curMaxDegree}.\n")
+
+                if curMaxDelta > highestMaxDelta:
+                    highestMaxDelta = curMaxDelta
+                    nodesWhenHighestDelta = len(self.G)
+                    file.write(f"New highest delta value found: {curMaxDelta}. Currently {nodesWhenHighestDelta} remaining.\n")
+
+                if curMaxDegree > highestMaxDegree:
+                    highestMaxDegree = curMaxDegree
+                    nodesWhenHighestDegree = len(self.G)
+                    file.write(f"New highest degree value found: {curMaxDegree}. Currently {nodesWhenHighestDegree} remaining.\n")
+
+            #when there is one node left
+            file.write(f"=== Graph is now depleted of nodes. Summarizing information below ===\n")
             
             #todo: write max values to log
+            file.write(f"Highest delta value encountered: {highestMaxDelta}. Encountered when {nodesWhenHighestDelta} nodes were remaining.\n")
+            file.write(f"Highest degree value encountered: {highestMaxDegree}. Encountered when {nodesWhenHighestDegree} nodes were remaining.\n")
+            file.write(f"2 Log(n) value: {LogN}.\n")
 
             file.write(f"=== Automation concluded. End of log. ===")
+            file.close()
 
         print(f"=== Automation concluded ===")
 
