@@ -9,6 +9,7 @@ from matplotlib.cm import ScalarMappable
 from collections import defaultdict
 import math
 import time
+import os
 
 import dash
 
@@ -332,7 +333,16 @@ class NetGraph:
         highestMaxDegree = 0
         everDisconnected = False
 
-        with open("automatic_log_output.txt", "w", encoding='utf-8') as file:
+        output_dir = "auto_output"
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        else: #clear output if the folder already exists
+            for filename in os.listdir(output_dir):
+                file_path = os.path.join(output_dir, filename)
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+
+        with open("automatic_log_output.txt", "w", encoding='utf-8') as file: #this will also overwrite the log if it already exists
 
             startTime = time.time()
             while len(self.G) > 1:
@@ -342,6 +352,9 @@ class NetGraph:
 
                 edgelist = self.DASH_healingstep() #function also updates graph. return value is new edges
                 file.write(f"DASH healing step was performed. New edges: {edgelist}\n")
+
+                filename = f"{output_dir}/{len(self.G)}.png"
+                plt.savefig(filename)
 
                 #values of current iteration
                 curMaxDelta = max([self.G.nodes[node]['delta'] for node in self.G.nodes()])
