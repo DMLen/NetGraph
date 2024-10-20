@@ -64,10 +64,6 @@ class btree:
 
 def dash(graph, deletednode, deletednodeneighbours):
     #note: deletednodeneighbours is only a list of ints!!! delta values have to be acquired from the graph
-
-
-    #print(f"lol! got graph with {len(graph.nodes)} nodes") #debug
-    #print(f"list of neighbors of node 1: {get_neighbors(graph, 1)}") #debug
     print(f"Most recently deleted node: {deletednode}, Neighbours of deleted node: {deletednodeneighbours}") #debug
 
     if len(deletednodeneighbours) == 1:
@@ -82,9 +78,6 @@ def dash(graph, deletednode, deletednodeneighbours):
 
 
     #1. inserted neighbours of deleted node by ascending order of delta value
-    #sorted_deletednodeneighbours = sorted(deletednodeneighbours, key=lambda id: graph.nodes[id]['delta'])
-    #print(f"Sorted neighbours by delta values: {sorted_deletednodeneighbours}")
-
     for node_id in deletednodeneighbours:
         delta_value = graph.nodes[node_id]['delta']
         print(f"Node ID: {node_id}, Delta Value: {delta_value}")
