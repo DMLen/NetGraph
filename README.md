@@ -7,4 +7,5 @@ When using the Debug (Autoplay) option, node deletion and healing will be automa
 - Matplotlib (3.9.2)
 - NetworkX (3.3)
 - imageio (2.36.0) (Only if using gifmaker.py)
+
 To install all requirements, run the command `pip install -r /path/to/requirements.txt`
