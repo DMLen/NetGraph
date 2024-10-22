@@ -13,33 +13,6 @@ import os
 
 import dash
 
-##TODO GET NON-UNIQUE NEIGHBOURS OF A NODE THAT WERE INTRODUCED VIA HEALING EDGES
-
-def partition(graph, node):
-    neighbors = list(graph.neighbors(node))
-    print(f"Neighbors of deleted node {node}: {neighbors}")
-
-    # Partitioning the neighbors based on their IDs
-    partitions = {}
-    for neighbor in neighbors:
-        # Assuming each node has a randomly assigned ID
-        node_id = graph.nodes[neighbor]['dashID']
-        if node_id not in partitions:
-            partitions[node_id] = []
-        partitions[node_id].append(neighbor)
-        print(f"Neighbor {neighbor} with dashID {node_id} added to partition")
-
-    # Select unique representatives from each partition
-    unique_neighbors = []
-    for partition_id, partition in partitions.items():
-        # Choose the neighbor with the lowest initial ID
-        representative = min(partition, key=lambda x: graph.nodes[x]['initial_dashID'])
-        unique_neighbors.append(representative)
-        print(f"Partition {partition_id} representatives: {partition}, selected: {representative} (via initial ID {graph.nodes[representative]['initial_dashID']})")
-
-    print(f"Unique neighbors for deleted node {node}: {unique_neighbors}")
-    return unique_neighbors
-
 def connect_graph(graph):
     if nx.is_connected(graph):
         return graph
@@ -117,10 +90,41 @@ class NetGraph:
 
         self.canvas = None
         self.G = None #g = graph
-        self.healcount = 1
+        self.healcount = 0
 
     def debug(self):
-        print(partition(self.G, 1))
+        print(self.partition(self.G, 1))
+
+    def partition(self, node):
+        neighbors = list(self.G.neighbors(node))
+        #remove neighbours added via healing edge so we're only left with natural neighbors
+        filterlist = self.get_healing_neighbors(node)
+        if len(filterlist) > 0:
+            for i in filterlist:
+                neighbors.remove(i)
+
+        print(f"Natural Neighbors of deleted node {node}: {neighbors}")
+
+        # Partitioning the neighbors based on their IDs
+        partitions = {}
+        for neighbor in neighbors:
+            # Assuming each node has a randomly assigned ID
+            node_id = self.G.nodes[neighbor]['dashID']
+            if node_id not in partitions:
+                partitions[node_id] = []
+            partitions[node_id].append(neighbor)
+            print(f"Neighbor {neighbor} with dashID {node_id} added to partition")
+
+        # Select unique representatives from each partition
+        unique_neighbors = []
+        for partition_id, partition in partitions.items():
+            # Choose the neighbor with the lowest initial ID
+            representative = min(partition, key=lambda x: self.G.nodes[x]['initial_dashID'])
+            unique_neighbors.append(representative)
+            print(f"Partition {partition_id} representatives: {partition}, selected: {representative} (via initial ID {self.G.nodes[representative]['initial_dashID']})")
+
+        print(f"Unique neighbors for deleted node {node}: {unique_neighbors}")
+        return unique_neighbors
 
     def get_healing_neighbors(self, node):
         if self.G is None:
@@ -142,7 +146,7 @@ class NetGraph:
     def handle_deletion(self, node):
         print(f"==Deletion event: Node {node}===")
         self.last_deleted_node = node
-        self.last_deleted_node_neighbours_list = partition(self.G, node)
+        self.last_deleted_node_neighbours_list = self.partition(node)
 
         #process healing neighbours (add them to list of deleted node's neighbours and decrement their delta value)
         templist = self.get_healing_neighbors(node)
@@ -172,6 +176,7 @@ class NetGraph:
             self.last_deleted_node = None
             self.last_deleted_node_neighbours_list = None #contains unique neighbours (not sharing the same dashID) of the last deleted node
             self.new_edges = [] #list of new edges created via healing
+            self.healcount = 0
             
             #higher power = smaller radius
             power = 0.5
